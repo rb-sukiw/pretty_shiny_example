@@ -81,18 +81,11 @@ headerUI <- function(id){
     class = "dropdown")
 }
 
-############################## DASHBOARD BODY UI ###############################
-bodyUI <- function(id){
-  ns <- NS(id)
-  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"))
-}
-
 ################################# TAB PANELS UI ################################
 dashboardUI <- function(id){
   ns <- NS(id)
   tagList(
-    column(
-      width = 12,
+    column(width = 12,
       fluidRow(
         tags$style(".nav-tabs-custom .nav-tabs li.active {border-top-color: #213469;}"),
         tabBox(
@@ -100,25 +93,16 @@ dashboardUI <- function(id){
           tabPanel(
             title = "Earthquake Info",
             div(uiOutput(ns("info")))
-          ),
-          tabPanel(
-            title = "Earthquake map",
-            plotOutput(
-              ns("map"),
-              height = 400,
-              width = 1300
-            )
-          )
-        ) #End tabBox
-      ), #End fluidRow
+      )
+        )#End tabBox
+      ),#End fluidRow
       br(),
       div(
         span(
-          tags$style(HTML('table.dataTable tr.selected td,
-                          table.dataTable
+          tags$style(HTML('table.dataTable tr.selected td, table.dataTable
                           td.selected {background-color: rgba(90, 91, 91, 0.6)
                           !important;}')),
-          DT::dataTableOutput(ns("quakes")),
+          DT::dataTableOutput(ns("main_table")),
           style = "height:40%;"
         )
       )
@@ -127,30 +111,27 @@ dashboardUI <- function(id){
 }
 
 ################################ DATA TABLE ###################################
-output_table <- function(data){
-  dat <- quakes %>%
-    rename(
-      "LATITUDE" = lat,
-      "LONGITUDE" = long,
-      "DEPTH" = depth,
-      "MAGNITUDE" = mag,
-      "REPORTING STATIONS" = stations
-    )
+tableUI <- function(data){
+  df <- quakes %>%
+    rename("LATITUDE" = lat,
+           "LONGITUDE" = long,
+           "DEPTH" = depth,
+           "MAGNITUDE" = mag,
+           "REPORTING STATIONS" = stations
+          )
   #Data table UI
   out <- datatable(
-    dat,
-    selection = "single",
-    rownames = FALSE,
+    df, selection = "single", rownames = FALSE,
     options = list(
-      pageLength = 10,
-      autoWidth = FALSE,
-      scrollX = FALSE,
-      columnDefs = list(
-        list(
-          width = '200px',
-          targets = c(0,1,2,3,4)
-        )
-      ),
+              pageLength = 10,
+              autoWidth = FALSE,
+              scrollX = FALSE,
+              columnDefs = list(
+                list(
+                  width = '200px',
+                  targets = c(0,1,2,3,4)
+                )
+              ),
       searching = TRUE
     ),
     class = 'cell-border stripe'
@@ -159,9 +140,7 @@ output_table <- function(data){
 }
 
 display_table <- function(input, output, session, data){
-  output$active_claims <- DT::renderDataTable({
-    output_table(data())
-  })
+  output$main_table <- renderDataTable({tableUI(data())})
 }
 
 ################################# QUAKE INFO TAB ###############################
@@ -169,17 +148,21 @@ info <- function(input, output, session, data){
   output$quake_info <- renderUI({
     validate(
       need(
-        try(input$selected_quake),
+        try(input$main_table_rows_selected),
         "Select a row to see a summary of the earthquake"
       )
     )
-    num_rows <- length(input$selected_quake)
+    num_rows <- length(input$main_table_rows_selected)
     if(num_rows > 0){
-      lat <- quakes$lat
-      long <- quakes$long
-      depth <- quakes$depth
-      mag <- quakes$mag
-      stations <- quakes$stations
+      index <- input$main_table_rows_selected
+      active_lat <- data()$main_table[index,]$lat
+      active_long <- data()$main_table[index,]$long
+      selected_df <- quakes %>% filter(lat == active_lat, long == active_long)
+      lat <- selected_df$lat
+      long <- selected_df$long
+      depth <- selected_df$depth
+      mag <- selected_df$mag
+      stations <- selected_df$stations
       out_html <- HTML(
         "<ul style = 'list-style-type:none'>",
         "<li><b>Location: </b>", lat, long, "</li>",
@@ -191,9 +174,4 @@ info <- function(input, output, session, data){
       return(out_html)
     }
   })
-}
-
-##################### RENDER HAZARD/REMAINING TIME PLOT ########################
-quake_map <- function(input, output, session, data){
-  return(pairs(quakes, main = "Fiji Earthquakes, N = 1000", cex.main = 1.2, pch = "."))
 }
