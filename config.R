@@ -5,11 +5,7 @@
 library(shiny)
 library(shinydashboard)
 library(dplyr)
-library(lubridate)
 library(DT)
-library(datasets)
-library(ggplot2)
-library(ggthemes)
 
 #Passwords
 users <- c("test", "dev")

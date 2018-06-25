@@ -83,7 +83,7 @@ headerUI <- function(id){
 
 ################################# TAB PANELS UI ################################
 dashboardUI <- function(id){
-  ns <- NS(id)
+  ns <- NS(id) #Create namespace function with the string "id"
   tagList(
     column(width = 12,
       fluidRow(
@@ -92,7 +92,7 @@ dashboardUI <- function(id){
           width = "100%",
           tabPanel(
             title = "Earthquake Info",
-            div(uiOutput(ns("info")))
+            div(uiOutput(ns("quake_info")))
       )
         )#End tabBox
       ),#End fluidRow
@@ -102,7 +102,7 @@ dashboardUI <- function(id){
           tags$style(HTML('table.dataTable tr.selected td, table.dataTable
                           td.selected {background-color: rgba(90, 91, 91, 0.6)
                           !important;}')),
-          DT::dataTableOutput(ns("main_table")),
+          DT::dataTableOutput(ns("quake_table")),
           style = "height:40%;"
         )
       )
@@ -111,7 +111,8 @@ dashboardUI <- function(id){
 }
 
 ################################ DATA TABLE ###################################
-tableUI <- function(data){
+#Helper function to clean and format quakes data
+table_output <- function(data){
   df <- quakes %>%
     rename("LATITUDE" = lat,
            "LONGITUDE" = long,
@@ -129,46 +130,44 @@ tableUI <- function(data){
               columnDefs = list(
                 list(
                   width = '200px',
-                  targets = c(0,1,2,3,4)
+                  targets = c(0,1,2,3,4),
+                  className = 'dt-center',
+                  targets = 0
                 )
               ),
       searching = TRUE
-    ),
+     ),
     class = 'cell-border stripe'
-  )
+   )
   return(out)
 }
 
+#Server function to display quakes data on the dashboard
 display_table <- function(input, output, session, data){
-  output$main_table <- renderDataTable({tableUI(data())})
+  output$quake_table <- DT::renderDataTable({
+    table_output(data())
+  })
 }
 
 ################################# QUAKE INFO TAB ###############################
-info <- function(input, output, session, data){
+quake_info <- function(input, output, session, data){
   output$quake_info <- renderUI({
     validate(
       need(
-        try(input$main_table_rows_selected),
-        "Select a row to see a summary of the earthquake"
+        try(input$quake_table_rows_selected),
+        "Select a row to see information about the earthquake"
       )
     )
-    num_rows <- length(input$main_table_rows_selected)
+    num_rows <- length(input$quake_table_rows_selected)
     if(num_rows > 0){
-      index <- input$main_table_rows_selected
-      active_lat <- data()$main_table[index,]$lat
-      active_long <- data()$main_table[index,]$long
-      selected_df <- quakes %>% filter(lat == active_lat, long == active_long)
-      lat <- selected_df$lat
-      long <- selected_df$long
-      depth <- selected_df$depth
-      mag <- selected_df$mag
-      stations <- selected_df$stations
+      index <- input$quake_table_rows_selected
+      selected_quake <- quakes[index,]
       out_html <- HTML(
         "<ul style = 'list-style-type:none'>",
-        "<li><b>Location: </b>", lat, long, "</li>",
-        "<li><b>Depth: </b>", depth, "</li>",
-        "<li><b>Magnitude: </b>", mag, "</li>",
-        "<li><b>Number of reporting stations: </b>", stations, "</li>",
+        "<li><b>Location: </b>", selected_quake$lat, ", ", selected_quake$long, "</li>",
+        "<li><b>Depth: </b>", selected_quake$depth, "km", "</li>",
+        "<li><b>Magnitude: </b>", selected_quake$mag, "(on the Richter scale)", "</li>",
+        "<li><b>Number of reporting stations: </b>", selected_quake$stations, "</li>",
         "</ul>"
       )
       return(out_html)
