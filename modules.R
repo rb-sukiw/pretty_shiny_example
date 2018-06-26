@@ -1,4 +1,49 @@
-################################# LOGIN SCREEN #################################
+################################# UI FUNCTIONS #################################
+#HEADER UI
+headerUI <- function(id){
+  ns <- NS(id) #Create namespace function with the user-provided ID
+  tags$li(a(
+    href = 'http://www.massmutual.com',
+    img(
+      src = 'massmutual_logo.png',
+      title = "Company Home",
+      height = "50px",
+      width = "200px"
+    ),
+    style = "padding-top: 0px; padding-bottom: 0px;"),
+    class = "dropdown")
+}
+
+#DASHBOARD UI
+dashboardUI <- function(id){
+  ns <- NS(id) #Create namespace function with the user-provided ID
+  tagList(
+    column(width = 12,
+           fluidRow(
+             tabBox(
+               width = "100%",
+               tabPanel(
+                 title = "Earthquake Info",
+                 div(uiOutput(ns("quake_info")))
+               )
+             )#End tabBox
+           ),#End fluidRow
+           br(),
+           div(
+             span(
+               tags$style(HTML('table.dataTable tr.selected td, table.dataTable
+                               td.selected {background-color: rgba(90, 91, 91, 0.6)
+                               !important;}')),
+               DT::dataTableOutput(ns("quake_table")),
+               style = "height:40%;"
+               )
+               )
+    ) #End column
+  ) #End tagList
+}
+
+############################ MODULE 1: LOGIN SCREEN ############################
+#UI for login module
 loginUI <- function(id){
   ns <- NS(id)
   tagList(
@@ -21,8 +66,9 @@ loginUI <- function(id){
   )
 }
 
+#Server logic for login module
 login <- function(input, output, session){
-  approved_users <- data.frame(users,passwords)
+  approved_users <- data.frame(users, passwords)
 
   login_attempt <- reactiveValues(
     message = "Please enter your login credentials", status = FALSE
@@ -35,8 +81,7 @@ login <- function(input, output, session){
     handlerExpr = {
       validate(
         need(input$user, "Please enter your username"),
-        need(input$pw, "Please enter your password"),
-        need(approved_users, "Problem with the vertica connection")
+        need(input$pw, "Please enter your password")
       )
       is_approved <- approved_users %>%
         filter(users == input$user, passwords == input$pw)
@@ -66,50 +111,8 @@ login <- function(input, output, session){
   })
 }
 
-################################### HEADER UI ##################################
-headerUI <- function(id){
-  ns <- NS(id)
-  tags$li(a(
-    href = 'http://www.massmutual.com',
-    img(
-      src = 'massmutual_logo.png',
-      title = "Company Home",
-      height = "50px",
-      width = "200px"
-    ),
-    style = "padding-top: 0px; padding-bottom: 0px;"),
-    class = "dropdown")
-}
 
-################################# TAB PANELS UI ################################
-dashboardUI <- function(id){
-  ns <- NS(id) #Create namespace function with the string "id"
-  tagList(
-    column(width = 12,
-           fluidRow(
-             tabBox(
-               width = "100%",
-               tabPanel(
-                 title = "Earthquake Info",
-                 div(uiOutput(ns("quake_info")))
-               )
-             )#End tabBox
-           ),#End fluidRow
-           br(),
-           div(
-             span(
-               tags$style(HTML('table.dataTable tr.selected td, table.dataTable
-                               td.selected {background-color: rgba(90, 91, 91, 0.6)
-                               !important;}')),
-               DT::dataTableOutput(ns("quake_table")),
-               style = "height:40%;"
-               )
-               )
-    ) #End column
-  ) #End tagList
-}
-
-################################ DATA TABLE ###################################
+########################### MODULE 2: DATA TABLE ###############################
 #Helper function to clean and format quakes data
 table_output <- function(data){
   df <- quakes %>%
@@ -119,7 +122,7 @@ table_output <- function(data){
            "MAGNITUDE" = mag,
            "REPORTING STATIONS" = stations
     )
-  #Data table UI
+  #Data table aesthetics
   out <- datatable(
     df, selection = "single", rownames = FALSE,
     options = list(
@@ -148,7 +151,7 @@ display_table <- function(input, output, session, data){
   })
 }
 
-################################# QUAKE INFO TAB ###############################
+############################ MODULE 3: QUAKE INFO TAB ##########################
 quake_info <- function(input, output, session, data){
   output$quake_info <- renderUI({
     validate(
