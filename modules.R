@@ -3,9 +3,9 @@
 headerUI <- function(id){
   ns <- NS(id) #Create namespace function with the user-provided ID
   tags$li(a(
-    href = 'http://www.massmutual.com',
+    href = "http://www.massmutual.com",
     img(
-      src = 'massmutual_logo.png',
+      src = "massmutual_logo.png",
       title = "Company Home",
       height = "50px",
       width = "200px"
@@ -26,18 +26,18 @@ dashboardUI <- function(id){
                  title = "Earthquake Info",
                  div(uiOutput(ns("quake_info")))
                )
-             )#End tabBox
-           ),#End fluidRow
+             ) #End tabBox
+           ), #End fluidRow
            br(),
            div(
              span(
-               tags$style(HTML('table.dataTable tr.selected td, table.dataTable
+               tags$style(HTML("table.dataTable tr.selected td, table.dataTable
                                td.selected {background-color: rgba(90, 91, 91, 0.6)
-                               !important;}')),
+                               !important;}")),
                DT::dataTableOutput(ns("quake_table")),
                style = "height:40%;"
                )
-               )
+            )
     ) #End column
   ) #End tagList
 }
@@ -73,7 +73,9 @@ login <- function(input, output, session){
   login_attempt <- reactiveValues(
     message = "Please enter your login credentials", status = FALSE
   )
-  output$logged_in <- reactive({return(login_attempt$status)})
+  output$logged_in <- reactive({
+                                return(login_attempt$status)
+                              })
   outputOptions(output, "logged_in", suspendWhenHidden = FALSE)
 
   observeEvent(
@@ -97,7 +99,7 @@ login <- function(input, output, session){
         ))
       }
     } #End handlerExpr
-  ) #End observEvent
+  ) #End observeEvent
 
   observeEvent(
     eventExpr = input$logout,
@@ -131,15 +133,15 @@ table_output <- function(data){
       scrollX = FALSE,
       columnDefs = list(
         list(
-          width = '200px',
-          targets = c(0,1,2,3,4),
-          className = 'dt-center',
+          width = "200px",
+          targets = c(0, 1, 2, 3, 4),
+          className = "dt-center",
           targets = 0
         )
       ),
       searching = TRUE
     ),
-    class = 'cell-border stripe'
+    class = "cell-border stripe"
   )
   return(out)
 }
@@ -163,7 +165,7 @@ quake_info <- function(input, output, session, data){
     num_rows <- length(input$quake_table_rows_selected)
     if(num_rows > 0){
       index <- input$quake_table_rows_selected
-      selected_quake <- quakes[index,]
+      selected_quake <- quakes[index, ]
       out_html <- HTML(
         "<ul style = 'list-style-type:none'>",
         "<li><b>Location: </b>", selected_quake$lat, ", ", selected_quake$long, "</li>",

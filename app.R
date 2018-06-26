@@ -1,9 +1,11 @@
-source('modules.R')
-source('config.R')
+source("modules.R")
+source("config.R")
 
 ui <- dashboardPage(
   dashboardHeader(title = "Making Shiny Dashboards Shine",
-                  titleWidth = 550, headerUI("quakes_header")),
+                  titleWidth = 550,
+                  headerUI("quakes_header")
+                  ),
   dashboardSidebar(disable = TRUE),
   dashboardBody(
     tags$head(
