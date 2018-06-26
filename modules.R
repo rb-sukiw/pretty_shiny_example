@@ -26,7 +26,7 @@ login <- function(input, output, session){
 
   login_attempt <- reactiveValues(
     message = "Please enter your login credentials", status = FALSE
-    )
+  )
   output$logged_in <- reactive({return(login_attempt$status)})
   outputOptions(output, "logged_in", suspendWhenHidden = FALSE)
 
@@ -51,8 +51,8 @@ login <- function(input, output, session){
           easyClose = TRUE
         ))
       }
-    } # end handlerExpr
-  ) # end observEvent
+    } #End handlerExpr
+  ) #End observEvent
 
   observeEvent(
     eventExpr = input$logout,
@@ -86,26 +86,25 @@ dashboardUI <- function(id){
   ns <- NS(id) #Create namespace function with the string "id"
   tagList(
     column(width = 12,
-      fluidRow(
-        tags$style(".nav-tabs-custom .nav-tabs li.active {border-top-color: #213469;}"),
-        tabBox(
-          width = "100%",
-          tabPanel(
-            title = "Earthquake Info",
-            div(uiOutput(ns("quake_info")))
-      )
-        )#End tabBox
-      ),#End fluidRow
-      br(),
-      div(
-        span(
-          tags$style(HTML('table.dataTable tr.selected td, table.dataTable
-                          td.selected {background-color: rgba(90, 91, 91, 0.6)
-                          !important;}')),
-          DT::dataTableOutput(ns("quake_table")),
-          style = "height:40%;"
-        )
-      )
+           fluidRow(
+             tabBox(
+               width = "100%",
+               tabPanel(
+                 title = "Earthquake Info",
+                 div(uiOutput(ns("quake_info")))
+               )
+             )#End tabBox
+           ),#End fluidRow
+           br(),
+           div(
+             span(
+               tags$style(HTML('table.dataTable tr.selected td, table.dataTable
+                               td.selected {background-color: rgba(90, 91, 91, 0.6)
+                               !important;}')),
+               DT::dataTableOutput(ns("quake_table")),
+               style = "height:40%;"
+               )
+               )
     ) #End column
   ) #End tagList
 }
@@ -119,26 +118,26 @@ table_output <- function(data){
            "DEPTH" = depth,
            "MAGNITUDE" = mag,
            "REPORTING STATIONS" = stations
-          )
+    )
   #Data table UI
   out <- datatable(
     df, selection = "single", rownames = FALSE,
     options = list(
-              pageLength = 10,
-              autoWidth = FALSE,
-              scrollX = FALSE,
-              columnDefs = list(
-                list(
-                  width = '200px',
-                  targets = c(0,1,2,3,4),
-                  className = 'dt-center',
-                  targets = 0
-                )
-              ),
+      pageLength = 10,
+      autoWidth = FALSE,
+      scrollX = FALSE,
+      columnDefs = list(
+        list(
+          width = '200px',
+          targets = c(0,1,2,3,4),
+          className = 'dt-center',
+          targets = 0
+        )
+      ),
       searching = TRUE
-     ),
+    ),
     class = 'cell-border stripe'
-   )
+  )
   return(out)
 }
 
